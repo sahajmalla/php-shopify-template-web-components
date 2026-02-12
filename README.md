@@ -2,6 +2,8 @@
 
 This is a template for building a [Shopify app](https://shopify.dev/docs/apps/getting-started) using PHP and React. It contains the basics for building a Shopify app.
 
+This repository is a modified version of the official Shopify template ([Shopify/shopify-app-template-php](https://github.com/Shopify/shopify-app-template-php)), updated to use Polaris web components instead of Polaris React.
+
 Rather than cloning this repo, you can use your preferred package manager and the Shopify CLI with [these steps](#installing-the-template).
 
 ## Benefits
