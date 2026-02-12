@@ -1,12 +1,9 @@
 import { useState } from "react";
-import { Toast } from "@shopify/app-bridge-react";
 import { useTranslation } from "react-i18next";
 import { useAppQuery, useAuthenticatedFetch } from "../hooks";
 
 export function ProductsCard() {
-  const emptyToastProps = { content: null };
   const [isLoading, setIsLoading] = useState(true);
-  const [toastProps, setToastProps] = useState(emptyToastProps);
   const fetch = useAuthenticatedFetch();
   const { t } = useTranslation();
   const productsCount = 5;
@@ -25,9 +22,12 @@ export function ProductsCard() {
     },
   });
 
-  const toastMarkup = toastProps.content && !isRefetchingCount && (
-    <Toast {...toastProps} onDismiss={() => setToastProps(emptyToastProps)} />
-  );
+  const showToast = (message, options = {}) => {
+    const shopifyGlobal = window["shopify"];
+    if (shopifyGlobal?.toast?.show && !isRefetchingCount) {
+      shopifyGlobal.toast.show(message, options);
+    }
+  };
 
   const handlePopulate = async () => {
     setIsLoading(true);
@@ -35,23 +35,19 @@ export function ProductsCard() {
 
     if (response.ok) {
       await refetchProductCount();
-      setToastProps({
-        content: t("ProductsCard.productsCreatedToast", {
+      showToast(
+        t("ProductsCard.productsCreatedToast", {
           count: productsCount,
         }),
-      });
+      );
     } else {
       setIsLoading(false);
-      setToastProps({
-        content: t("ProductsCard.errorCreatingProductsToast"),
-        error: true,
-      });
+      showToast(t("ProductsCard.errorCreatingProductsToast"), { isError: true });
     }
   };
 
   return (
     <>
-      {toastMarkup}
       <s-section heading={t("ProductsCard.title")}>
         <p>{t("ProductsCard.description")}</p>
         <div style={{ marginTop: "12px" }}>

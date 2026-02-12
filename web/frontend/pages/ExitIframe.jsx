@@ -1,33 +1,53 @@
-import { Redirect } from "@shopify/app-bridge/actions";
-import { useAppBridge, Loading } from "@shopify/app-bridge-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 export default function ExitIframe() {
-  const app = useAppBridge();
   const { search } = useLocation();
   const [showWarning, setShowWarning] = useState(false);
 
   useEffect(() => {
-    if (!!app && !!search) {
-      const params = new URLSearchParams(search);
-      const redirectUri = params.get("redirectUri");
-      const url = new URL(decodeURIComponent(redirectUri));
+    const shopifyGlobal = window["shopify"];
+    shopifyGlobal?.loading?.(true);
+
+    const params = new URLSearchParams(search);
+    const redirectUri = params.get("redirectUri");
+
+    if (!redirectUri) {
+      setShowWarning(true);
+      shopifyGlobal?.loading?.(false);
+      return undefined;
+    }
+
+    try {
+      const decodedUri = decodeURIComponent(redirectUri);
+      const url = new URL(decodedUri);
 
       if (
         [location.hostname, "admin.shopify.com"].includes(url.hostname) ||
         url.hostname.endsWith(".myshopify.com")
       ) {
-        const redirect = Redirect.create(app);
-        redirect.dispatch(
-          Redirect.Action.REMOTE,
-          decodeURIComponent(redirectUri)
-        );
+        open(decodedUri, "_top");
       } else {
         setShowWarning(true);
+        shopifyGlobal?.loading?.(false);
       }
+    } catch (_error) {
+      setShowWarning(true);
+      shopifyGlobal?.loading?.(false);
     }
-  }, [app, search, setShowWarning]);
+
+    return undefined;
+  }, [search]);
+
+  useEffect(() => {
+    if (showWarning) {
+      window["shopify"]?.loading?.(false);
+    }
+
+    return () => {
+      window["shopify"]?.loading?.(false);
+    };
+  }, [showWarning]);
 
   return showWarning ? (
     <s-page>
@@ -40,6 +60,6 @@ export default function ExitIframe() {
       </s-section>
     </s-page>
   ) : (
-    <Loading />
+    null
   );
 }

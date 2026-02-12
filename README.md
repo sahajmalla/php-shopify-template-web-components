@@ -12,7 +12,7 @@ Shopify apps are built on a variety of Shopify tools to create a great merchant 
 
 The PHP app template comes with the following out-of-the-box functionality:
 
--   OAuth: Installing the app and granting permissions
+-   Shopify managed installation + token exchange: Installing the app and authenticating backend requests
 -   GraphQL Admin API: Querying or mutating Shopify admin data
 -   REST Admin API: Resource classes to interact with the API
 -   Shopify-specific tooling:
@@ -37,8 +37,8 @@ This template combines a number of third party open source tools:
 
 These third party tools are complemented by Shopify specific tools to ease app development:
 
--   [Shopify API library](https://github.com/Shopify/shopify-api-php) adds OAuth to the Laravel backend. This lets users install the app and grant scope permissions.
--   [App Bridge React](https://shopify.dev/docs/tools/app-bridge/react-components) adds authentication to API requests in the frontend and renders components outside of the embedded App’s iFrame.
+-   [Shopify API library](https://github.com/Shopify/shopify-api-php) and [Shopify App PHP](https://github.com/Shopify/shopify-app-php) handle backend auth, including App Home request verification, token exchange, and legacy OAuth compatibility.
+-   [App Bridge](https://shopify.dev/docs/api/app-home) is loaded via `app-bridge.js` and provides global APIs (for example `shopify.toast` and `shopify.loading`) plus authenticated `fetch` in the embedded app.
 -   [Polaris web components](https://shopify.dev/docs/api/app-home/polaris-web-components) provide Shopify-native UI primitives for embedded apps.
 -   [Custom hooks](https://github.com/Shopify/shopify-frontend-template-react/tree/main/hooks) make authenticated requests to the GraphQL Admin API.
 -   [File-based routing](https://github.com/Shopify/shopify-frontend-template-react/blob/main/Routes.jsx) makes creating new pages easier.

@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="shopify-api-key" content="%SHOPIFY_API_KEY%" />
 
     <!-- Ensures that the UI is properly scaled in the Shopify Mobile app -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,9 +18,10 @@
       }
     </script>
     <script
-      type="module"
-      src="https://cdn.shopify.com/shopifycloud/polaris.js"
+      src="https://cdn.shopify.com/shopifycloud/app-bridge.js"
+      data-api-key="%SHOPIFY_API_KEY%"
     ></script>
+    <script src="https://cdn.shopify.com/shopifycloud/polaris.js"></script>
   </head>
   <body>
     <div id="app"><!--index.jsx injects App.jsx here--></div>

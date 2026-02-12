@@ -4,6 +4,7 @@ use App\Exceptions\ShopifyProductCreatorException;
 use App\Lib\AuthRedirection;
 use App\Lib\EnsureBilling;
 use App\Lib\ProductCreator;
+use App\Lib\ShopifyAppBridge;
 use App\Models\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
@@ -33,17 +34,15 @@ use Shopify\Webhooks\Topics;
 |
 */
 
-Route::fallback(function (Request $request) {
-    if (Context::$IS_EMBEDDED_APP &&  $request->query("embedded", false) === "1") {
-        if (env('APP_ENV') === 'production') {
-            return file_get_contents(public_path('index.html'));
-        } else {
-            return file_get_contents(base_path('frontend/index.html'));
-        }
-    } else {
-        return redirect(Utils::getEmbeddedAppUrl($request->query("host", null)) . "/" . $request->path());
-    }
-})->middleware('shopify.installed');
+Route::get('/auth/patch-id-token', function (Request $request) {
+    /** @var ShopifyAppBridge $shopifyAppBridge */
+    $shopifyAppBridge = app(ShopifyAppBridge::class);
+    $result = $shopifyAppBridge->app()->appHomePatchIdToken(
+        $shopifyAppBridge->requestToShopifyReq($request)
+    );
+
+    return $shopifyAppBridge->resultToResponse($result);
+});
 
 Route::get('/api/auth', function (Request $request) {
     $shop = Utils::sanitizeShopDomain($request->query('shop'));
@@ -143,3 +142,30 @@ Route::post('/api/webhooks', function (Request $request) {
         return response()->json(['message' => "Got an exception when handling '$topic' webhook"], 500);
     }
 });
+
+Route::fallback(function (Request $request) {
+    if (Context::$IS_EMBEDDED_APP &&  $request->query("embedded", false) === "1") {
+        /** @var ShopifyAppBridge $shopifyAppBridge */
+        $shopifyAppBridge = app(ShopifyAppBridge::class);
+        $verificationResult = $shopifyAppBridge->app()->verifyAppHomeReq(
+            $shopifyAppBridge->requestToShopifyReq($request),
+            appHomePatchIdTokenPath: '/auth/patch-id-token',
+        );
+
+        if (!$verificationResult->ok) {
+            return $shopifyAppBridge->resultToResponse($verificationResult);
+        }
+
+        if (env('APP_ENV') === 'production') {
+            $response = response(file_get_contents(public_path('index.html')));
+        } else {
+            $response = response(file_get_contents(base_path('frontend/index.html')));
+        }
+
+        $shopifyAppBridge->applyResultHeaders($response, $verificationResult);
+
+        return $response;
+    } else {
+        return redirect(Utils::getEmbeddedAppUrl($request->query("host", null)) . "/" . $request->path());
+    }
+})->middleware('shopify.installed');

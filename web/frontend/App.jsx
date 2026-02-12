@@ -1,10 +1,9 @@
 import { useEffect } from "react";
 import { BrowserRouter, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { NavigationMenu } from "@shopify/app-bridge-react";
 import Routes from "./Routes";
 
-import { AppBridgeProvider, QueryProvider } from "./components";
+import { QueryProvider } from "./components";
 
 function ShopifyNavigateHandler() {
   const navigate = useNavigate();
@@ -37,19 +36,15 @@ export default function App() {
   return (
     <BrowserRouter>
       <ShopifyNavigateHandler />
-      <AppBridgeProvider>
-        <QueryProvider>
-          <NavigationMenu
-            navigationLinks={[
-              {
-                label: t("NavigationMenu.pageName"),
-                destination: "/pagename",
-              },
-            ]}
-          />
-          <Routes pages={pages} />
-        </QueryProvider>
-      </AppBridgeProvider>
+      <QueryProvider>
+        <s-app-nav>
+          <s-link href="/" rel="home">
+            {t("HomePage.title")}
+          </s-link>
+          <s-link href="/pagename">{t("NavigationMenu.pageName")}</s-link>
+        </s-app-nav>
+        <Routes pages={pages} />
+      </QueryProvider>
     </BrowserRouter>
   );
 }

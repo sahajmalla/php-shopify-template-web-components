@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Lib\DbSessionStorage;
+use App\Lib\ShopifyAppBridge;
 use App\Lib\Handlers\AppUninstalled;
 use App\Lib\Handlers\Privacy\CustomersDataRequest;
 use App\Lib\Handlers\Privacy\CustomersRedact;
@@ -23,7 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->singleton(ShopifyAppBridge::class, function () {
+            return new ShopifyAppBridge();
+        });
     }
 
     /**
@@ -43,7 +46,7 @@ class AppServiceProvider extends ServiceProvider
             env('SCOPES', 'not_defined'),
             $host,
             new DbSessionStorage(),
-            ApiVersion::OCTOBER_2025,
+            ApiVersion::JANUARY_2026,
             true,
             false,
             null,

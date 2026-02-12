@@ -18,16 +18,20 @@ class AccessControlHeaders
      */
     public function handle(Request $request, Closure $next)
     {
+        /** @var Response $response */
+        $response = $next($request);
+
         if (Context::$IS_EMBEDDED_APP) {
-
-            /** @var Response $response */
-            $response = $next($request);
-
             $response->headers->set("Access-Control-Allow-Origin", "*");
-            $response->headers->set("Access-Control-Allow-Header", "Authorization");
-            $response->headers->set("Access-Control-Expose-Headers", 'X-Shopify-API-Request-Failure-Reauthorize-Url');
-
-            return $response;
+            $response->headers->set("Access-Control-Allow-Headers", "Authorization");
+            $response->headers->set(
+                "Access-Control-Expose-Headers",
+                "X-Shopify-Retry-Invalid-Session-Request, " .
+                "X-Shopify-API-Request-Failure-Reauthorize, " .
+                "X-Shopify-API-Request-Failure-Reauthorize-Url"
+            );
         }
+
+        return $response;
     }
 }

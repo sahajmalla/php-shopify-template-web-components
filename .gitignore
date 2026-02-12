@@ -1,2 +1,6 @@
 node_modules/
 .DS_Store
+web/vendor/
+web/composer.lock
+web/public/assets
+web/public/index.html
