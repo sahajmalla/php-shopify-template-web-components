@@ -44,6 +44,16 @@ These third party tools are complemented by Shopify specific tools to ease app d
 -   [File-based routing](https://github.com/Shopify/shopify-frontend-template-react/blob/main/Routes.jsx) makes creating new pages easier.
 -   [`@shopify/i18next-shopify`](https://github.com/Shopify/i18next-shopify) is a plugin for [`i18next`](https://www.i18next.com/) that allows translation files to follow the same JSON schema used by Shopify [app extensions](https://shopify.dev/docs/apps/checkout/best-practices/localizing-ui-extensions#how-it-works) and [themes](https://shopify.dev/docs/themes/architecture/locales/storefront-locale-files#usage).
 
+## Authentication architecture
+
+This template uses Shopify's modern embedded authentication pattern by default.
+
+1. Shopify managed install is enabled in `shopify.app.toml` (`use_legacy_install_flow = false`).
+1. The frontend uses App Bridge and sends authenticated requests using the session-token-aware `fetch`.
+1. The backend verifies embedded App Home requests and exchanges ID tokens for Admin API access tokens using `shopify/shopify-app-php`.
+1. Access tokens are stored in the app database and reused; token exchange is not performed on every request.
+1. Legacy OAuth routes (`/api/auth`, `/api/auth/callback`) remain in the template as compatibility/fallback paths, but token exchange is the primary flow for embedded requests.
+
 ## Getting started
 
 ### Requirements
@@ -56,27 +66,34 @@ These third party tools are complemented by Shopify specific tools to ease app d
 
 ### Installing the template
 
-This template runs on Shopify CLI 3.0, which is a node package that can be included in projects. You can install it using your preferred Node.js package manager:
+Shopify now recommends scaffolding apps with Shopify CLI directly.
 
-Using yarn:
-
-```shell
-yarn create @shopify/app --template php
-```
-
-Using npx:
+1. Install Shopify CLI globally (once):
 
 ```shell
-npm init @shopify/app@latest -- --template php
+npm install -g @shopify/cli@latest
 ```
 
-Using pnpm:
+2. Initialize a new app from a template repository:
 
 ```shell
-pnpm create @shopify/app@latest --template php
+shopify app init --template https://github.com/sahajmalla/php-shopify-template-web-components
 ```
 
-This will clone the template and install the CLI in that project.
+This command scaffolds from this customized template repository.
+
+You can also set the package manager explicitly:
+
+```shell
+# npm
+shopify app init --template https://github.com/sahajmalla/php-shopify-template-web-components --package-manager npm
+
+# yarn
+shopify app init --template https://github.com/sahajmalla/php-shopify-template-web-components --package-manager yarn
+
+# pnpm
+shopify app init --template https://github.com/sahajmalla/php-shopify-template-web-components --package-manager pnpm
+```
 
 ### Setting up your Laravel app
 
@@ -299,7 +316,7 @@ pnpm dev --tunnel-url https://randomly-generated-hostname.trycloudflare.com:3000
 ## Developer resources
 
 -   [Introduction to Shopify apps](https://shopify.dev/docs/apps/getting-started)
--   [App authentication](https://shopify.dev/docs/apps/auth)
+-   [Authentication and authorization](https://shopify.dev/docs/apps/build/authentication-authorization)
 -   [Shopify CLI](https://shopify.dev/docs/apps/tools/cli)
 -   [Shopify API Library documentation](https://github.com/Shopify/shopify-api-php/tree/main/docs)
 -   [Getting started with internationalizing your app](https://shopify.dev/docs/apps/best-practices/internationalization/getting-started)
